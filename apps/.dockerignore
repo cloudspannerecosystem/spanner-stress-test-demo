@@ -1,0 +1,15 @@
+__pycache__
+.dockerignore
+.env
+.env_sample
+.mypy_cache
+.venv
+.vscode
+Makefile
+docker-compose.yml
+schemas
+Dockerfile
+scripts
+README.md
+locust
+terraform

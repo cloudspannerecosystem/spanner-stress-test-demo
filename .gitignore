@@ -127,3 +127,18 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# vscode settings
+/.code-workspace
+settings.json
+
+# development settings
+.env_local
+dev-key.json
+
+# terraform settings
+.terraform/
+.terraform.*
+*.tfvars
+*.tfstate.*
+*.tfstate
