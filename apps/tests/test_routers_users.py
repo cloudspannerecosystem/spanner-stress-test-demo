@@ -81,3 +81,8 @@ class TestUsers:
                 assert (res.json()["name"], res.json()["mail"]) == (user["name"], user["mail"])
             else:
                 assert res.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def test_delete_user(self):
+        res = client.delete(API_PATH)
+
+        assert res.status_code == status.HTTP_200_OK
