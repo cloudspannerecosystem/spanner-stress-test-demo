@@ -60,7 +60,7 @@ def read_user(user_id: str, db: Database = Depends(get_db)) -> JSONResponse:
         results = list(snapshot.execute_sql(query, request_options={"request_tag": create_req_tag("select", "read_user", "users")}))
 
     if not results:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="The character did not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="This character did not found")
 
     return JSONResponse(content=jsonable_encoder(UserResponse(user_id=results[0][0], name=results[0][1], mail=results[0][2])))
 

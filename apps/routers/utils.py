@@ -36,6 +36,9 @@ instance = client.instance(INSTANCE)
 pool = PingingPool(size=30, default_timeout=5, ping_interval=300)
 database = instance.database(DATABASE, pool=pool)
 
+# NOTE: stale read settings
+character_master_delay: int = 3
+
 # NOTE: set host path to spanner own emulator in local env
 if getenv("ENV", "local") == "local":
     environ["SPANNER_EMULATOR_HOST"] = "localhost:9010"
