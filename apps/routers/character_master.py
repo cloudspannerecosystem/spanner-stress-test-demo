@@ -25,10 +25,7 @@ from .utils import character_master_delay, create_req_tag, get_db, get_uuid
 
 TABLE: str = "CharacterMasters"
 
-router = APIRouter(
-    prefix="/character_master",
-    tags=["character_master"],
-)
+router = APIRouter(prefix="/character_master", tags=["character_master"])
 
 
 class CharacterMaster(BaseModel):

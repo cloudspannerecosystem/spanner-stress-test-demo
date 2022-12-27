@@ -27,8 +27,8 @@ API_PATH = "/api/v1/character_master/"
 client = TestClient(app)
 
 
-def create_test_character_masters() -> List[CharacterMasterRespose]:
-    test_character_masters = [CharacterMaster(name=f"test_{i}", kind="test") for i in range(10)]
+def create_test_character_masters(num: int) -> List[CharacterMasterRespose]:
+    test_character_masters = [CharacterMaster(name=f"test_{i}", kind="test") for i in range(num)]
     responses = []
     for test_character_master in test_character_masters:
         res = client.post(API_PATH, data=test_character_master.json(), headers={"Content-Type": "application/json", "User-Agent": "unit-test-agent"})
@@ -45,9 +45,9 @@ def delete_all_character_masters() -> None:
 class TestCharacterMaster:
 
     @fixture(scope="function", autouse=True)
-    def create_test_users(self):
+    def setup_and_teardown(self):
         # NOTE: setup
-        self.test_users = create_test_character_masters()
+        self.test_users = create_test_character_masters(10)
         # NOTE: run test function
         yield
         # NOTE: tear down

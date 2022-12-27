@@ -25,10 +25,7 @@ from .utils import create_req_tag, get_db, get_uuid, opponent_master_delay
 
 TABLE: str = "OpponentMasters"
 
-router = APIRouter(
-    prefix="/opponent_master",
-    tags=["opponent_master"],
-)
+router = APIRouter(prefix="/opponent_master", tags=["opponent_master"])
 
 
 class OpponentMaster(BaseModel):

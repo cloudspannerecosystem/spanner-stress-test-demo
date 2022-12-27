@@ -27,9 +27,9 @@ API_PATH = "/api/v1/opponent_master/"
 client = TestClient(app)
 
 
-def create_test_opponent_masters() -> List[OpponentMasterResponse]:
+def create_test_opponent_masters(num: int) -> List[OpponentMasterResponse]:
     responses = []
-    for test_opponent_master in [OpponentMaster(name=f"test_{i}", kind="test", strength=10, experience=10) for i in range(10)]:
+    for test_opponent_master in [OpponentMaster(name=f"test_{i}", kind="test", strength=10, experience=10) for i in range(num)]:
         res = client.post(API_PATH, data=test_opponent_master.json(), headers={"Content-Type": "application/json", "User-Agent": "unit-test-agent"})
         if res.status_code != status.HTTP_201_CREATED:
             raise Exception("Failed to create a character master")
@@ -41,12 +41,12 @@ def delete_all_opponent_masters() -> None:
     client.delete(API_PATH)
 
 
-class TestCharacterMaster:
+class TestOpponentMaster:
 
     @fixture(scope="function", autouse=True)
-    def create_test_users(self):
+    def setup_and_teardown(self):
         # NOTE: setup
-        self.test_users = create_test_opponent_masters()
+        self.test_users = create_test_opponent_masters(10)
         # NOTE: run test function
         yield
         # NOTE: tear down

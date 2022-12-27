@@ -33,10 +33,7 @@ Characters: str = "Characters"
 BattleHistory: str = "BattleHistory"
 BattleHistoryByUserId: str = "@{FORCE_INDEX=BattleHistoryByUserId}"
 
-router = APIRouter(
-    prefix="/battles",
-    tags=["battles"],
-)
+router = APIRouter(prefix="/battles", tags=["battles"])
 
 
 class Battles(BaseModel):
@@ -99,14 +96,11 @@ def battles(battles: Battles, db: Database = Depends(get_db)) -> JSONResponse:
         opponents_query = f"SELECT OpponentId, Kind, Strength, Experience FROM {OpponentMasters} TABLESAMPLE RESERVOIR (1 ROWS)"
         opponents = list(snapshot.execute_sql(opponents_query, request_options={"request_tag": create_req_tag("select", "run_battles", "opponents")}))
     if not opponents:
-        raise HTTPException(
-            status_code=503, detail="Any opponent masters does not found")
+        raise HTTPException(status_code=503, detail="Any opponent masters does not found")
     if not characters:
-        raise HTTPException(
-            status_code=404, detail="The character did not found")
+        raise HTTPException(status_code=404, detail="The character did not found")
     opponent = Opponent(**dict(zip(Opponent.__fields__.keys(), opponents[0])))
-    character = Character(
-        **dict(zip(Character.__fields__.keys(), characters[0])))
+    character = Character(**dict(zip(Character.__fields__.keys(), characters[0])))
     # NOTE: decide results randomly, because this is dummy game
     result: bool = random() <= 0.5
     if result:

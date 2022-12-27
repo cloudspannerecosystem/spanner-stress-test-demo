@@ -25,8 +25,8 @@ API_PATH = "/api/v1/users/"
 client = TestClient(app)
 
 
-def create_test_users() -> List[UserResponse]:
-    test_users = [User(name=f"sample_{i}", mail=f"sample_{i}@example.com", password="hogehoge") for i in range(10)]
+def create_test_users(num: int) -> List[UserResponse]:
+    test_users = [User(name=f"sample_{i}", mail=f"sample_{i}@example.com", password="hogehoge") for i in range(num)]
     responses = []
     for test_user in test_users:
         res = client.post(API_PATH, data=test_user.json(), headers={"Content-Type": "application/json", "User-Agent": "unit-test-agent"})
@@ -42,9 +42,9 @@ def delete_all_users() -> None:
 
 class TestUsers:
     @fixture(scope="function", autouse=True)
-    def create_test_users(self):
+    def setup_and_teardown(self):
         # NOTE: setup
-        self.test_users = create_test_users()
+        self.test_users = create_test_users(10)
         # NOTE: run test function
         yield
         # NOTE: tear down

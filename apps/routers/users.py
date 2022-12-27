@@ -25,10 +25,7 @@ from .utils import create_req_tag, get_db, get_password_hash, get_uuid
 
 TABLE: str = "Users"
 
-router = APIRouter(
-    prefix="/users",
-    tags=["users"],
-)
+router = APIRouter(prefix="/users", tags=["users"])
 
 
 class User(BaseModel):
@@ -57,8 +54,7 @@ def get_user(user_id: str, db: Database = Depends(get_db)) -> JSONResponse:
     """Get a user"""
     with db.snapshot() as snapshot:
         query = f"SELECT UserId, Name, Mail From {TABLE} WHERE UserId=@UserId"
-        params = {"UserId": user_id}
-        params_type = {"UserId": spanner.param_types.INT64}
+        params, params_type = {"UserId": user_id}, {"UserId": spanner.param_types.INT64}
         request_options = {"request_tag": create_req_tag("select", "read_user", "users")}
         results = list(snapshot.execute_sql(query, params=params, param_types=params_type, request_options=request_options))
 
@@ -75,11 +71,11 @@ def create_user(user: User, db: Database = Depends(get_db)) -> JSONResponse:
         query = f"INSERT {TABLE} ( UserId, Name, Mail, Password, CreatedAt, UpdatedAt ) VALUES ( @UserId, @Name, @Mail, @Password, PENDING_COMMIT_TIMESTAMP(), PENDING_COMMIT_TIMESTAMP() )"
         params = {"UserId": user_id, "Name": user.name, "Mail": user.mail, "Password": hashed_password}
         params_type = {"UserId": spanner.param_types.INT64, "Name": spanner.param_types.STRING, "Password": spanner.param_types.STRING}
+        request_options = {"request_tag": create_req_tag("insert", "create_user", "users")}
         transaction.execute_update(query, params=params, param_types=params_type, request_options=request_options)
 
     user_id = get_uuid()
     hashed_password = get_password_hash(user.password.get_secret_value())
-    request_options = {"request_tag": create_req_tag("insert", "create_user", "users")}
 
     db.run_in_transaction(create_user_repository)
 
