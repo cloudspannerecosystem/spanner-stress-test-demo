@@ -44,7 +44,7 @@ class UserResponse(BaseModel):
 
 
 @router.get("/", tags=["users"], response_model=List[UserResponse])
-def read_random_users(db: Database = Depends(get_db)) -> JSONResponse:
+def get_random_users(db: Database = Depends(get_db)) -> JSONResponse:
     """Get 1,000 random users for tests initial requests"""
     with db.snapshot() as snapshot:
         query = f"SELECT UserId, Name, Mail From {TABLE} TABLESAMPLE RESERVOIR (1000 ROWS)"
@@ -52,12 +52,15 @@ def read_random_users(db: Database = Depends(get_db)) -> JSONResponse:
     return JSONResponse(content=jsonable_encoder([UserResponse(**dict(zip(UserResponse.__fields__.keys(), result))).dict() for result in results]))
 
 
-@router.get("/{user_id}", tags=["users"], response_model=UserResponse, responses={status.HTTP_404_NOT_FOUND: {"description": "User does not found", "content": {"application/json": {"example": {"detail": "The character did not found"}}}}})
-def read_user(user_id: str, db: Database = Depends(get_db)) -> JSONResponse:
+@router.get("/{user_id}", tags=["users"], response_model=UserResponse, responses={status.HTTP_404_NOT_FOUND: {"description": "User does not found", "content": {"application/json": {"example": {"detail": "This user does not found"}}}}})
+def get_user(user_id: str, db: Database = Depends(get_db)) -> JSONResponse:
     """Get a user"""
     with db.snapshot() as snapshot:
-        query = f"SELECT UserId, Name, Mail From {TABLE} WHERE UserId={user_id}"
-        results = list(snapshot.execute_sql(query, request_options={"request_tag": create_req_tag("select", "read_user", "users")}))
+        query = f"SELECT UserId, Name, Mail From {TABLE} WHERE UserId=@UserId"
+        params = {"UserId": user_id}
+        params_type = {"UserId": spanner.param_types.INT64}
+        request_options = {"request_tag": create_req_tag("select", "read_user", "users")}
+        results = list(snapshot.execute_sql(query, params=params, param_types=params_type, request_options=request_options))
 
     if not results:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="This character did not found")
@@ -67,7 +70,7 @@ def read_user(user_id: str, db: Database = Depends(get_db)) -> JSONResponse:
 
 @router.post("/", tags=["users"], response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def create_user(user: User, db: Database = Depends(get_db)) -> JSONResponse:
-    """Create user"""
+    """Create a user"""
     def create_user_repository(transaction):
         query = f"INSERT {TABLE} ( UserId, Name, Mail, Password, CreatedAt, UpdatedAt ) VALUES ( @UserId, @Name, @Mail, @Password, PENDING_COMMIT_TIMESTAMP(), PENDING_COMMIT_TIMESTAMP() )"
         params = {"UserId": user_id, "Name": user.name, "Mail": user.mail, "Password": hashed_password}
