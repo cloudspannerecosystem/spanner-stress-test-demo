@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from google.cloud.spanner_v1.database import Database
@@ -62,7 +62,7 @@ def read_user(user_id: str, db: Database = Depends(get_db)) -> JSONResponse:
         query = f"SELECT UserId, Name, Mail From {TABLE} WHERE UserId={user_id}"
         results = list(snapshot.execute_sql(query, request_options={"request_tag": create_req_tag("select", "read_user", "users")}))
     if not results:
-        raise HTTPException(status_code=404, detail="The character did not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="The character did not found")
     return JSONResponse(content=jsonable_encoder(UserResponse(user_id=results[0][0], name=results[0][1], mail=results[0][2])))
 
 

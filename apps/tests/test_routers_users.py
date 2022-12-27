@@ -19,21 +19,22 @@ from fastapi.testclient import TestClient
 from main import app
 from pytest import fixture
 from pytest_mock import MockFixture
-from routers.users import User
+from routers.users import User, UserResponse
 
 API_PATH = "/api/v1/users/"
 
 client = TestClient(app)
 
 
-def create_test_users() -> List[User]:
+def create_test_users() -> List[UserResponse]:
     test_users = [User(name=f"sample_{i}", mail=f"sample_{i}@example.com", password="hogehoge") for i in range(10)]
-    headers: Dict[str, str] = {"Content-Type": "application/json", "User-Agent": "unit-test-agent"}
+    responses = []
     for test_user in test_users:
-        res = client.post(API_PATH, data=test_user.json(), headers=headers)
+        res = client.post(API_PATH, data=test_user.json(), headers={"Content-Type": "application/json", "User-Agent": "unit-test-agent"})
         if res.status_code != status.HTTP_201_CREATED:
             raise Exception("Failed to create a user")
-    return test_users
+        responses.append(UserResponse(**res.json()))
+    return responses
 
 
 def delete_all_users() -> None:
@@ -41,7 +42,7 @@ def delete_all_users() -> None:
 
 
 class TestUsers:
-    @fixture(scope="function", autouse=True)
+    @ fixture(scope="function", autouse=True)
     def create_test_users(self):
         # NOTE: setup
         self.test_users = create_test_users()
@@ -51,9 +52,21 @@ class TestUsers:
         delete_all_users()
 
     def test_get_users(self):
-        """Succeeded to get users"""
         res = client.get(API_PATH)
 
         assert res.status_code == status.HTTP_200_OK
-        for result, expected in zip(sorted([(r["name"], r["mail"]) for r in res.json()]), self.test_users):
-            assert result == (expected.name, expected.mail)
+        for result, expected in zip(sorted([(r["name"], r["mail"], r["user_id"]) for r in res.json()]), self.test_users):
+            assert result == (expected.name, expected.mail, expected.user_id)
+
+    def test_get_user(self):
+        dummy_id = "111"
+        test_user_ids = [self.test_users[0].user_id, dummy_id]
+
+        for i, _id in enumerate(test_user_ids):
+            res = client.get(API_PATH + _id)
+
+            if i == 0:
+                assert res.status_code == status.HTTP_200_OK
+                assert res.json() == self.test_users[0]
+            else:
+                assert res.status_code == status.HTTP_404_NOT_FOUND
