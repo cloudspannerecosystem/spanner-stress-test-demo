@@ -27,11 +27,11 @@ context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 num_shards = 100
 
 # NOTE: Spanner Settings
-PROJECT: str = getenv("GOOGLE_CLOUD_PROJECT", "stress-test-demo")
-INSTANCE: str = getenv("INSTANCE_NAME", "local")
+PROJECT: str = getenv("GOOGLE_CLOUD_PROJECT", "test-local")
+INSTANCE: str = getenv("INSTANCE_NAME", "spanner-demo")
 DATABASE: str = getenv("DATABASE_NAME", "sample-game")
 
-client = Client()
+client = Client(project=PROJECT)
 instance = client.instance(INSTANCE)
 pool = PingingPool(size=30, default_timeout=5, ping_interval=300)
 database = instance.database(DATABASE, pool=pool)

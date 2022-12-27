@@ -50,8 +50,6 @@ def read_random_users(db: Database = Depends(get_db)) -> JSONResponse:
     with db.snapshot() as snapshot:
         query = f"SELECT UserId, Name, Mail From {TABLE} TABLESAMPLE RESERVOIR (1000 ROWS)"
         results = list(snapshot.execute_sql(query))
-    if not results:
-        raise HTTPException(status_code=503, detail="Any users does not found")
     return JSONResponse(content=jsonable_encoder([UserResponse(**dict(zip(UserResponse.__fields__.keys(), result))).dict() for result in results]))
 
 

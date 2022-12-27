@@ -58,6 +58,7 @@ create.emulator.database:
 
 .PHONY: run.spanner-cli
 run.spanner-cli:
+	@docker-compose up -d spanner-cli
 	@docker-compose exec spanner-cli spanner-cli -p $(LOCAL_DEV_CLOUD_PROJECT) -i $(INSTANCE_NAME) -d $(DATABASE_NAME)
 
 .PHONY: run.local-app
