@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -77,7 +76,7 @@ def create_user(user: User, db: Database = Depends(get_db)) -> JSONResponse:
     values = (user_id, user.name, user.mail, hashed_password, "PENDING_COMMIT_TIMESTAMP()", "PENDING_COMMIT_TIMESTAMP()")
     request_options = {"request_tag": create_req_tag("insert", "create_user", "users")}
     db.run_in_transaction(build_insert_query, TABLE, columns, values, request_options)
-    return JSONResponse(status_code=201, content=jsonable_encoder(UserResponse(user_id=user_id, name=user.name, mail=user.mail)))
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=jsonable_encoder(UserResponse(user_id=user_id, name=user.name, mail=user.mail)))
 
 
 @router.delete("/", tags=["users"])

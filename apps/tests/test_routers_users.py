@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, List
+from typing import List
 
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
 from pytest import fixture
-from pytest_mock import MockFixture
 from routers.users import User, UserResponse
 
 API_PATH = "/api/v1/users/"
@@ -42,7 +41,7 @@ def delete_all_users() -> None:
 
 
 class TestUsers:
-    @ fixture(scope="function", autouse=True)
+    @fixture(scope="function", autouse=True)
     def create_test_users(self):
         # NOTE: setup
         self.test_users = create_test_users()
@@ -70,3 +69,15 @@ class TestUsers:
                 assert res.json() == self.test_users[0]
             else:
                 assert res.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_create_user(self):
+        created_users = [{"name": "sample_100", "mail": "sample_100@example.com", "password": "hogehoge"}, {"test": "hoge"}]
+
+        for i, user in enumerate(created_users):
+            res = client.post(API_PATH, json=user, headers={"Content-Type": "application/json", "User-Agent": "unit-test-agent"})
+
+            if i == 0:
+                assert res.status_code == status.HTTP_201_CREATED
+                assert (res.json()["name"], res.json()["mail"]) == (user["name"], user["mail"])
+            else:
+                assert res.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
