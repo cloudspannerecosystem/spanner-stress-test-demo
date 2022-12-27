@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from datetime import datetime
 from os import environ, getenv
 from time import time_ns
@@ -38,6 +37,7 @@ database = instance.database(DATABASE, pool=pool)
 
 # NOTE: stale read settings
 character_master_delay: int = 3
+opponent_master_delay: int = 3
 
 # NOTE: set host path to spanner own emulator in local env
 if getenv("ENV", "local") == "local":

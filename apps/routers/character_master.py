@@ -55,14 +55,14 @@ def get_random_character_master(db: Database = Depends(get_db)) -> JSONResponse:
     return JSONResponse(content=jsonable_encoder(CharacterMasterRespose(character_master_id=results[0][0], name=results[0][1], kind=results[0][2])))
 
 
-@router.get("/{character_id}", tags=["character_master"], response_model=CharacterMasterRespose, responses={status.HTTP_404_NOT_FOUND: {"description": "User does not found", "content": {"application/json": {"example": {"detail": "This character master did not found"}}}}})
+@router.get("/{character_id}", tags=["character_master"], response_model=CharacterMasterRespose, responses={status.HTTP_404_NOT_FOUND: {"description": "Charactor master does not found", "content": {"application/json": {"example": {"detail": "This character master did not found"}}}}})
 def get_character_master(character_id: int, db: Database = Depends(get_db)) -> JSONResponse:
     """Get a character master"""
     with db.snapshot(exact_staleness=timedelta(seconds=character_master_delay)) as snapshot:
         query = f"SELECT CharacterId, Name, Kind From {TABLE} WHERE CharacterId=@CharacterId"
         params = {"CharacterId": character_id}
         params_type = {"CharacterId": spanner.param_types.INT64}
-        request_options = {"request_tag": create_req_tag("select", "read_character_master", "character_master")}
+        request_options = {"request_tag": create_req_tag("select", "get_character_master", "character_master")}
         results = list(snapshot.execute_sql(query, params=params, param_types=params_type, request_options=request_options))
 
     if not results:
