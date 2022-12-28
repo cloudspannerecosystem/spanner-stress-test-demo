@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.encoders import jsonable_encoder
@@ -116,7 +116,7 @@ def create_characters(characters: Character, db: Database = Depends(get_db)) -> 
     return JSONResponse(status_code=201, content=jsonable_encoder(resp))
 
 
-@router.delete("/", tags=["characters"])
+@router.delete("/", tags=["characters"], response_model=Optional[dict])
 def delete_all_characters(db: Database = Depends(get_db)) -> JSONResponse:
     """Delete all characters"""
     db.execute_partitioned_dml(f"DELETE FROM {TABLE} WHERE Id > 0")

@@ -32,12 +32,13 @@ DATABASE: str = getenv("DATABASE_NAME", "sample-game")
 
 client = Client(project=PROJECT)
 instance = client.instance(INSTANCE)
-pool = PingingPool(size=30, default_timeout=5, ping_interval=300)
+pool = PingingPool(size=100, default_timeout=5, ping_interval=300)
 database = instance.database(DATABASE, pool=pool)
 
 # NOTE: stale read settings
 character_master_delay: int = 3
 opponent_master_delay: int = 3
+battle_history_delay: int = 15
 
 # NOTE: set host path to spanner own emulator in local env
 if getenv("ENV", "local") == "local":

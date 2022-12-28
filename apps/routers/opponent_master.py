@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from datetime import timedelta
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.encoders import jsonable_encoder
@@ -80,7 +81,7 @@ def create_opponent_master(opponent_master: OpponentMaster, db: Database = Depen
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=jsonable_encoder(res))
 
 
-@router.delete("/", tags=["opponent_master"])
+@router.delete("/", tags=["opponent_master"], response_model=Optional[dict])
 def delete_opponent_master(db: Database = Depends(get_db)) -> JSONResponse:
     db.execute_partitioned_dml(f"DELETE FROM {TABLE} WHERE OpponentId > 0")
     return JSONResponse(content=jsonable_encoder({}))

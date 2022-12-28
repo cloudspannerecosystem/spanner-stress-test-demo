@@ -12,20 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from datetime import timedelta
-from random import randint, random
-from typing import Any
+from random import choice, randint, random
+from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from google.cloud import spanner
 from google.cloud.spanner_v1.database import Database
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-from .utils import (create_req_tag, epoch_to_datetime, get_db,
-                    get_entry_shard_id, get_uuid, num_shards)
+from .utils import (battle_history_delay, create_req_tag, epoch_to_datetime,
+                    get_db, get_entry_shard_id, get_uuid, num_shards)
 
 OpponentMasters: str = "OpponentMasters"
 Characters: str = "Characters"
@@ -37,85 +36,108 @@ router = APIRouter(prefix="/battles", tags=["battles"])
 
 
 class Battles(BaseModel):
-    character_id: str
+    character_id: str = Field(..., example="111111111")
+
+
+class BattleResponse(BaseModel):
+    retult: bool = Field(..., example=True)
 
 
 class BattleHistoryResponse(BaseModel):
-    user_id: str
-    character_id: str
-    opponent_id: str
-    result: bool
-    created_at: str
-    updated_at: str
+    user_id: str = Field(..., example="111111111")
+    character_id: str = Field(..., example="111111111")
+    opponent_id: str = Field(..., example="111111111")
+    result: bool = Field(..., example=True)
+    created_at: str = Field(..., example="2022-10-28T18:13:52.227030+00:00")
+    updated_at: str = Field(..., example="2022-10-28T18:19:52.227030+00:00")
 
 
 class Opponent(BaseModel):
-    opponent_id: str
-    kind: str
-    strength: int
-    experience: int
+    opponent_id: str = Field(..., example="111111111")
+    kind: str = Field(..., example="hoge")
+    strength: int = Field(..., example=10)
+    experience: int = Field(..., example=10)
 
 
 class Character(BaseModel):
-    id: str
-    user_id: str
-    level: int
-    experience: int
-    strength: int
+    id: str = Field(..., example="111111111")
+    user_id: str = Field(..., example="111111111")
+    level: int = Field(..., example=10)
+    experience: int = Field(..., example=10)
+    strength: int = Field(..., example=10)
 
 
-@router.post("/", tags=["battles"])
+battle_resp_docs: Dict[int, Dict[str, Any]] = {
+    status.HTTP_404_NOT_FOUND: {
+        "description": "User character does not find",
+        "content": {
+            "application/json": {
+                "example": {"detail": "This character does not found"}
+            }
+        },
+    },
+    status.HTTP_503_SERVICE_UNAVAILABLE: {
+        "description": "Oppnent master data does not exsist",
+        "content": {
+            "application/json": {
+                "example": {"detail": "Any opponent masters does not found"}
+            }
+        },
+    }
+}
+
+
+@router.post("/", tags=["battles"], response_model=BattleResponse, status_code=status.HTTP_201_CREATED, responses={**battle_resp_docs})
 def battles(battles: Battles, db: Database = Depends(get_db)) -> JSONResponse:
-    """
-    Battles against opponents
-    """
-    def write_battle_result(transaction: Any) -> None:
-        update_query = f"""
-                        UPDATE {Characters}
-                            SET 
-                               Level = {character.level + int(random() / 0.95)},
-                               Experience = {character.experience + opponent.experience},
-                               Strength = {character.strength + randint(0, opponent.experience // 100)},
-                               UpdatedAt = PENDING_COMMIT_TIMESTAMP()
-                            WHERE
-                               Id = {int(character.id)} AND UserId = {int(character.user_id)}
-                        """
-        insert_query = f"""
-                        INSERT {BattleHistory}
-                            (BattleHistoryId, UserId, Id, OpponentId, Result, EntryShardId, CreatedAt, UpdatedAt)
-                        VALUES
-                            ({get_uuid()}, {int(character.user_id)}, {int(character.id)}, {int(opponent.opponent_id)}, {result}, {get_entry_shard_id(int(character.user_id))}, PENDING_COMMIT_TIMESTAMP(), PENDING_COMMIT_TIMESTAMP())
-                        """
-        transaction.batch_update([update_query, insert_query], request_options={
-                                 "request_tag": create_req_tag("update&insert", "run_battle", "characters&battlehistories")})
+    """Battle against a opponent"""
+    def battle_repository(transaction: Any) -> None:
+        update_query = f"UPDATE {Characters} SET Level=@LEVEL, Experience=@Experience, Strength=@Strength, UpdatedAt=PENDING_COMMIT_TIMESTAMP() WHERE Id=@Id AND UserId=@UserId"
+        update_params = {"Level": character.level + int(random() / 0.95), "Experience": character.experience +
+                         opponent.experience, "Strength": character.strength + randint(0, opponent.experience // 100), "Id": int(character.id), "UserId": int(character.user_id)}
+        update_params_type = {"Level": spanner.param_types.INT64, "Experience": spanner.param_types.INT64,
+                              "Strength": spanner.param_types.INT64, "Id": spanner.param_types.INT64, "UserId": spanner.param_types.INT64}
+        update_request_options = {"request_tag": create_req_tag("update", "run_battle", "characters")}
+        transaction.execute_update(update_query, params=update_params, param_types=update_params_type, request_options=update_request_options)
+
+        insert_query = f"INSERT {BattleHistory} (BattleHistoryId, UserId, Id, OpponentId, Result, EntryShardId, CreatedAt, UpdatedAt) VALUES (@BattleHistoryId, @UserId, @Id, @OpponentId, @Result, @EntryShardId, PENDING_COMMIT_TIMESTAMP(), PENDING_COMMIT_TIMESTAMP())"
+        insert_params = {"BattleHistoryId": get_uuid(), "UserId": int(character.user_id), "Id": int(character.id),
+                         "OpponentId": int(opponent.opponent_id), "Result": result, "EntryShardId": get_entry_shard_id(int(character.user_id))}
+        insert_params_type = {"BattleHistoryId": spanner.param_types.INT64, "UserId": spanner.param_types.INT64,
+                              "Id": spanner.param_types.INT64, "OpponentId": spanner.param_types.INT64, "Result": spanner.param_types.BOOL, "EntryShardId": spanner.param_types.INT64}
+        insert_request_options = {"request_tag": create_req_tag("insert", "run_battle", "battlehistories")}
+        transaction.execute_update(insert_query, params=insert_params, param_types=insert_params_type, request_options=insert_request_options)
 
     with db.snapshot(multi_use=True) as snapshot:
-        characters_query = f"SELECT Id, UserId, Level, Experience, Strength FROM {Characters} WHERE Id={battles.character_id}"
-        characters = list(snapshot.execute_sql(characters_query, request_options={
-                          "request_tag": create_req_tag("select", "run_battles", "characters")}))
+        characters_query = f"SELECT Id, UserId, Level, Experience, Strength FROM {Characters} WHERE Id=@Id"
+        characters_params, characters_params_type = {"Id": battles.character_id}, {"Id": spanner.param_types.INT64}
+        characters_request_options = {"request_tag": create_req_tag("select", "read_user", "users")}
+        characters = list(snapshot.execute_sql(characters_query, params=characters_params,
+                          param_types=characters_params_type, request_options=characters_request_options))
         opponents_query = f"SELECT OpponentId, Kind, Strength, Experience FROM {OpponentMasters} TABLESAMPLE RESERVOIR (1 ROWS)"
         opponents = list(snapshot.execute_sql(opponents_query, request_options={"request_tag": create_req_tag("select", "run_battles", "opponents")}))
+
     if not opponents:
-        raise HTTPException(status_code=503, detail="Any opponent masters does not found")
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Any opponent masters does not found")
     if not characters:
-        raise HTTPException(status_code=404, detail="The character did not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="This character does not found")
     opponent = Opponent(**dict(zip(Opponent.__fields__.keys(), opponents[0])))
-    character = Character(**dict(zip(Character.__fields__.keys(), characters[0])))
+    character = Character(**dict(zip(Character.__fields__.keys(), choice(characters))))
     # NOTE: decide results randomly, because this is dummy game
     result: bool = random() <= 0.5
-    if result:
-        db.run_in_transaction(write_battle_result)
-    return JSONResponse(content=jsonable_encoder({"result": result}))
+
+    db.run_in_transaction(battle_repository)
+
+    return JSONResponse(content=jsonable_encoder(BattleResponse(retult=result)), status_code=status.HTTP_201_CREATED)
 
 
-@router.get("/history", tags=["battles"])
-def battle_history(user_id: int, since: int, until: int, db: Database = Depends(get_db)) -> JSONResponse:
+@router.get("/history", tags=["battles"], response_model=List[Optional[BattleHistoryResponse]])
+def get_battle_histories(user_id: int, since: int, until: int, db: Database = Depends(get_db)) -> JSONResponse:
     """
     Append battle history
 
     stale read from history table between since and until
     """
-    with db.snapshot(exact_staleness=timedelta(seconds=15)) as snapshot:
+    with db.snapshot(exact_staleness=timedelta(seconds=battle_history_delay)) as snapshot:
         query = f"""SELECT UserId, Id, OpponentId,  Result, CreatedAt, UpdatedAt FROM {BattleHistory+BattleHistoryByUserId}
                   WHERE UserId={user_id} AND UpdatedAt BETWEEN @Since AND @Until AND EntryShardId BETWEEN 0 AND {num_shards-1}
                   ORDER BY UpdatedAt DESC LIMIT 300"""
@@ -133,8 +155,7 @@ def battle_history(user_id: int, since: int, until: int, db: Database = Depends(
     return JSONResponse(content=jsonable_encoder(res))
 
 
-@router.delete("/history", tags=["battles"])
+@router.delete("/history", tags=["battles"], response_model=Optional[dict])
 def delete_all_battle_histories(db: Database = Depends(get_db)) -> JSONResponse:
-    db.execute_partitioned_dml(
-        f"DELETE FROM {BattleHistory} WHERE BattleHistoryId > 0")
+    db.execute_partitioned_dml(f"DELETE FROM {BattleHistory} WHERE BattleHistoryId > 0")
     return JSONResponse(content=jsonable_encoder({}))

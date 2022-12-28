@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from datetime import timedelta
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.encoders import jsonable_encoder
@@ -79,7 +80,7 @@ def create_character_master(character_master: CharacterMaster, db: Database = De
     return JSONResponse(status_code=201, content=jsonable_encoder(res))
 
 
-@router.delete("/", tags=["character_master"])
+@router.delete("/", tags=["character_master"], response_model=Optional[dict])
 def delete_character_masters(db: Database = Depends(get_db)) -> JSONResponse:
     db.execute_partitioned_dml(f"DELETE FROM {TABLE} WHERE CharacterId > 0")
     return JSONResponse(content=jsonable_encoder({}))

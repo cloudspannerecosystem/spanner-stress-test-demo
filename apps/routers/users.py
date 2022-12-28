@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.encoders import jsonable_encoder
@@ -82,7 +82,7 @@ def create_user(user: User, db: Database = Depends(get_db)) -> JSONResponse:
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=jsonable_encoder(UserResponse(user_id=user_id, name=user.name, mail=user.mail)))
 
 
-@router.delete("/", tags=["users"])
+@router.delete("/", tags=["users"], response_model=Optional[dict])
 def delete_all_users(db: Database = Depends(get_db)) -> JSONResponse:
     """Delete all users"""
     db.execute_partitioned_dml(f"DELETE FROM {TABLE} WHERE UserId > 0")

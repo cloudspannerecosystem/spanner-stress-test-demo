@@ -114,7 +114,7 @@ $ pipenv install --dev
 $ pipenv shell
 
 # export ../.env file values in your env
-export GOOGLE_CLOUD_PROJECT=$(LOCAL_DEV_CLOUD_PROJECT) INSTANCE_NAME=$(INSTANCE_NAME) DATABASE_NAME=$(DATABASE_NAME) ENV=local
+export GOOGLE_CLOUD_PROJECT=$(LOCAL_DEV_CLOUD_PROJECT) INSTANCE_NAME=$(INSTANCE_NAME) DATABASE_NAME=$(DATABASE_NAME) ENV=local SPANNER_EMULATOR_HOST=localhost:9010
 
 # run api server
 $ pipenv run server
