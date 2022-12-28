@@ -36,12 +36,12 @@ typing-extensions = "==4.2.0"
 urllib3 = "==1.26.9"
 pytest = "*"
 pytest-cov = "*"
-pytest-mock = "*"
 
 [requires]
 python_version = "3.9"
 
 [scripts]
 server = "uvicorn main:app --reload --host=0.0.0.0"
+test = "python -m pytest --no-header -vv -s"
 load_data = "python scripts/main.py"
 load_env = "bash -c export $(cat ../.env)"

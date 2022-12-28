@@ -18,7 +18,7 @@ from time import time_ns
 from typing import Any, Dict, Tuple
 from uuid import uuid4
 
-from google.cloud.spanner import Client, PingingPool, TransactionPingingPool
+from google.cloud.spanner import Client, PingingPool
 from google.cloud.spanner_v1.database import Database
 from passlib.context import CryptContext
 

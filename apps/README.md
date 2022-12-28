@@ -122,12 +122,54 @@ $ pipenv run server
 
 ## Run unit-tests
 
-TBD
+*Note: If you don't finish Run API server in local part, this part do after that*
+
+When you run unit-tests in local, you do as followings:
+
+```bash
+# need to install python and pipenv, before doing followings:
+$ cd ./apps
+# enable virtualenv
+$ pipenv shell
+
+$ python -m pytest --no-header -vv -s
+========================================== test session starts ===========================================
+collected 19 items                                                                                       
+
+tests/test_routers_battles.py::TestBattles::test_get_battle_histories PASSED
+tests/test_routers_battles.py::TestBattles::test_battle PASSED
+tests/test_routers_battles.py::TestBattles::test_delete_user PASSED
+tests/test_routers_character_master.py::TestCharacterMaster::test_get_random_character_master PASSED
+tests/test_routers_character_master.py::TestCharacterMaster::test_get_character_master PASSED
+tests/test_routers_character_master.py::TestCharacterMaster::test_create_character_master PASSED
+tests/test_routers_character_master.py::TestCharacterMaster::test_delete_character_master PASSED
+tests/test_routers_characters.py::TestCharacters::test_get_random_characters PASSED
+tests/test_routers_characters.py::TestCharacters::test_get_character PASSED
+tests/test_routers_characters.py::TestCharacters::test_create_characters PASSED
+tests/test_routers_characters.py::TestCharacters::test_delete_user PASSED
+tests/test_routers_opponent_master.py::TestOpponentMaster::test_get_random_opponent_master PASSED
+tests/test_routers_opponent_master.py::TestOpponentMaster::test_get_opponent_master PASSED
+tests/test_routers_opponent_master.py::TestOpponentMaster::test_create_opponent_master PASSED
+tests/test_routers_opponent_master.py::TestOpponentMaster::test_delete_opponent_master PASSED
+tests/test_routers_users.py::TestUsers::test_get_users PASSED
+tests/test_routers_users.py::TestUsers::test_get_user PASSED
+tests/test_routers_users.py::TestUsers::test_create_user PASSED
+tests/test_routers_users.py::TestUsers::test_delete_user PASSED
+
+========================================== 19 passed in 52.05s ===========================================
+```
 
 ## Environment values
 
-TBD
-
+|                      |                                                                                                                                    |                                                                                                                          | 
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | 
+| Key name             | Description                                                                                                                        | Example value                                                                                                            | 
+| GOOGLE_CLOUD_PROJECT | Google Cloud Project ID                                                                                                            | test                                                                                                                     | 
+| INSTANCE_NAME        | Cloud Spanner's instance name                                                                                                      | spanner-demo                                                                                                             | 
+| DATABASE_NAME        | Cloud Spanner's database name for testing                                                                                          | sample-game                                                                                                              | 
+| ENV                  | Env id, but we expected to use "production" when you deploy on Google Cloud.                                                       | production                                                                                                               | 
+| LOG_LEVEL            | Loglevel of app and Locust                                                                                                         | INFO                                                                                                                     |                                                                                                                  | 
+| SPANNER_EMULATOR_HOST            | Settings to connect spanner emulator                                                                                                         | localhost:9010                                                                                                                     |                                                                                                                  | 
 ## Contribution
 
 Please read [contributing.md](../docs/contributing.md).
