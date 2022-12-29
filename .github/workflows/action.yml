@@ -52,10 +52,10 @@ jobs:
       - name: Validate terraform files
         run: cp .env_sample .env && make terraform.init
 
-      - name: Install python 3.9
+      - name: Install python 3.9.14
         uses: gabrielfalcao/pyenv-action@v11
         with:
-          default: 3.9
+          default: 3.9.14
           command: |
             pip install -U pip
             pip install pipenv

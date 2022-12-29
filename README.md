@@ -159,9 +159,9 @@ $ make delete.cloud.environment
 
 ### Internal modules reference
 
-- [sample game app documents](./apps/README.md)
-- [test senario documents by locust](./locust/README.md)
-- [terraform documents](./terraform/README.md)
+- [Sample game app documents](./apps/README.md)
+- [Test senario documents by locust](./locust/README.md)
+- [Terraform documents](./terraform/README.md)
 
 ### 3rd party reference
 
