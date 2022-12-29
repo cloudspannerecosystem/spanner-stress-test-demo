@@ -74,8 +74,7 @@ def create_character_master(character_master: CharacterMaster, db: Database = De
     """Create a character master"""
     with db.batch() as batch:
         uid = get_uuid()
-        batch.insert(table=TABLE, columns=("CharacterId", "Name", "Kind", "CreatedAt", "UpdatedAt"), values=[
-                     (uid, character_master.name, character_master.kind, spanner.COMMIT_TIMESTAMP, spanner.COMMIT_TIMESTAMP)])
+        batch.insert(table=TABLE, columns=("CharacterId", "Name", "Kind", "CreatedAt", "UpdatedAt"), values=[(uid, character_master.name, character_master.kind, spanner.COMMIT_TIMESTAMP, spanner.COMMIT_TIMESTAMP)])
         res = CharacterMasterRespose(character_master_id=uid, name=character_master.name, kind=character_master.kind)
     return JSONResponse(status_code=201, content=jsonable_encoder(res))
 

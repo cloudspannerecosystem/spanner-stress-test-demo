@@ -171,7 +171,7 @@ ssh.bastion:
 
 .PHONY: terraform.init
 terraform.init:
-	@cd $(CURRENT_DIR)/terraform && terraform init
+	@cd $(CURRENT_DIR)/terraform && terraform init && terraform validate
 
 .PHONY: terraform.plan
 terraform.plan:

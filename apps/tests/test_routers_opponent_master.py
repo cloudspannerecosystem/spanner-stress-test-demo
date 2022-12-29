@@ -86,8 +86,7 @@ class TestOpponentMaster:
             if i == 0:
                 assert res.status_code == status.HTTP_201_CREATED
                 ret = res.json()
-                assert (ret["name"], ret["kind"], ret["strength"], ret["experience"]) == (
-                    user["name"], user["kind"], user["strength"], user["experience"])
+                assert (ret["name"], ret["kind"], ret["strength"], ret["experience"]) == (user["name"], user["kind"], user["strength"], user["experience"])
             else:
                 assert res.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 

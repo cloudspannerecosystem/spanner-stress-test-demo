@@ -102,8 +102,7 @@ class TestCharacters:
                 assert res.status_code == status.HTTP_404_NOT_FOUND
 
     def test_create_characters(self):
-        created_users = [{"user_id": self.test_user.user_id, "character_id": self.test_character_masters[0].character_master_id,
-                          "name": "hoge", "level": 10, "experience": 10, "strength": 10}, {"test": "hoge"}]
+        created_users = [{"user_id": self.test_user.user_id, "character_id": self.test_character_masters[0].character_master_id, "name": "hoge", "level": 10, "experience": 10, "strength": 10}, {"test": "hoge"}]
 
         for i, user in enumerate(created_users):
             res = client.post(API_PATH, json=user, headers={"Content-Type": "application/json", "User-Agent": "unit-test-agent"})

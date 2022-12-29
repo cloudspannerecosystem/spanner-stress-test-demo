@@ -74,10 +74,8 @@ def create_opponent_master(opponent_master: OpponentMaster, db: Database = Depen
     """Create opponent master"""
     with db.batch() as batch:
         uid = get_uuid()
-        batch.insert(table=TABLE, columns=("OpponentId", "Name", "Kind", "Strength", "Experience", "CreatedAt", "UpdatedAt"),
-                     values=[(uid, opponent_master.name, opponent_master.kind, opponent_master.strength, opponent_master.experience, spanner.COMMIT_TIMESTAMP, spanner.COMMIT_TIMESTAMP)])
-        res = OpponentMasterResponse(opponent_id=uid, name=opponent_master.name, kind=opponent_master.kind,
-                                     strength=opponent_master.strength, experience=opponent_master.experience)
+        batch.insert(table=TABLE, columns=("OpponentId", "Name", "Kind", "Strength", "Experience", "CreatedAt", "UpdatedAt"), values=[(uid, opponent_master.name, opponent_master.kind, opponent_master.strength, opponent_master.experience, spanner.COMMIT_TIMESTAMP, spanner.COMMIT_TIMESTAMP)])
+        res = OpponentMasterResponse(opponent_id=uid, name=opponent_master.name, kind=opponent_master.kind, strength=opponent_master.strength, experience=opponent_master.experience)
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=jsonable_encoder(res))
 
 

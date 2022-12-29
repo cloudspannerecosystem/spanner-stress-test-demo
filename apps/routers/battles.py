@@ -92,18 +92,14 @@ def battles(battles: Battles, db: Database = Depends(get_db)) -> JSONResponse:
     """Battle against a opponent"""
     def battle_repository(transaction: Any) -> None:
         update_query = f"UPDATE {Characters} SET Level=@LEVEL, Experience=@Experience, Strength=@Strength, UpdatedAt=PENDING_COMMIT_TIMESTAMP() WHERE Id=@Id AND UserId=@UserId"
-        update_params = {"Level": character.level + int(random() / 0.95), "Experience": character.experience +
-                         opponent.experience, "Strength": character.strength + randint(0, opponent.experience // 100), "Id": int(character.id), "UserId": int(character.user_id)}
-        update_params_type = {"Level": spanner.param_types.INT64, "Experience": spanner.param_types.INT64,
-                              "Strength": spanner.param_types.INT64, "Id": spanner.param_types.INT64, "UserId": spanner.param_types.INT64}
+        update_params = {"Level": character.level + int(random() / 0.95), "Experience": character.experience + opponent.experience, "Strength": character.strength + randint(0, opponent.experience // 100), "Id": int(character.id), "UserId": int(character.user_id)}
+        update_params_type = {"Level": spanner.param_types.INT64, "Experience": spanner.param_types.INT64, "Strength": spanner.param_types.INT64, "Id": spanner.param_types.INT64, "UserId": spanner.param_types.INT64}
         update_request_options = {"request_tag": create_req_tag("update", "run_battle", "characters")}
         transaction.execute_update(update_query, params=update_params, param_types=update_params_type, request_options=update_request_options)
 
         insert_query = f"INSERT {BattleHistory} (BattleHistoryId, UserId, Id, OpponentId, Result, EntryShardId, CreatedAt, UpdatedAt) VALUES (@BattleHistoryId, @UserId, @Id, @OpponentId, @Result, @EntryShardId, PENDING_COMMIT_TIMESTAMP(), PENDING_COMMIT_TIMESTAMP())"
-        insert_params = {"BattleHistoryId": get_uuid(), "UserId": int(character.user_id), "Id": int(character.id),
-                         "OpponentId": int(opponent.opponent_id), "Result": result, "EntryShardId": get_entry_shard_id(int(character.user_id))}
-        insert_params_type = {"BattleHistoryId": spanner.param_types.INT64, "UserId": spanner.param_types.INT64,
-                              "Id": spanner.param_types.INT64, "OpponentId": spanner.param_types.INT64, "Result": spanner.param_types.BOOL, "EntryShardId": spanner.param_types.INT64}
+        insert_params = {"BattleHistoryId": get_uuid(), "UserId": int(character.user_id), "Id": int(character.id), "OpponentId": int(opponent.opponent_id), "Result": result, "EntryShardId": get_entry_shard_id(int(character.user_id))}
+        insert_params_type = {"BattleHistoryId": spanner.param_types.INT64, "UserId": spanner.param_types.INT64, "Id": spanner.param_types.INT64, "OpponentId": spanner.param_types.INT64, "Result": spanner.param_types.BOOL, "EntryShardId": spanner.param_types.INT64}
         insert_request_options = {"request_tag": create_req_tag("insert", "run_battle", "battlehistories")}
         transaction.execute_update(insert_query, params=insert_params, param_types=insert_params_type, request_options=insert_request_options)
 
@@ -111,8 +107,7 @@ def battles(battles: Battles, db: Database = Depends(get_db)) -> JSONResponse:
         characters_query = f"SELECT Id, UserId, Level, Experience, Strength FROM {Characters} WHERE Id=@Id"
         characters_params, characters_params_type = {"Id": battles.character_id}, {"Id": spanner.param_types.INT64}
         characters_request_options = {"request_tag": create_req_tag("select", "read_user", "users")}
-        characters = list(snapshot.execute_sql(characters_query, params=characters_params,
-                          param_types=characters_params_type, request_options=characters_request_options))
+        characters = list(snapshot.execute_sql(characters_query, params=characters_params, param_types=characters_params_type, request_options=characters_request_options))
         opponents_query = f"SELECT OpponentId, Kind, Strength, Experience FROM {OpponentMasters} TABLESAMPLE RESERVOIR (1 ROWS)"
         opponents = list(snapshot.execute_sql(opponents_query, request_options={"request_tag": create_req_tag("select", "run_battles", "opponents")}))
 

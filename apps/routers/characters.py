@@ -86,10 +86,8 @@ def create_characters(characters: Character, db: Database = Depends(get_db)) -> 
     """Create character such as getting a monster"""
     def create_character_repository(transaction):
         columns = ("Id", "UserId", "CharacterId", "Name", "Level", "Experience", "Strength", "CreatedAt", "UpdatedAt")
-        values = (character_id, int(characters.user_id), int(characters.character_id),
-                  characters.name, characters.level, characters.experience, characters.experience)
-        types = (spanner.param_types.INT64, spanner.param_types.INT64, spanner.param_types.INT64,
-                 spanner.param_types.STRING, spanner.param_types.INT64, spanner.param_types.INT64, spanner.param_types.INT64)
+        values = (character_id, int(characters.user_id), int(characters.character_id), characters.name, characters.level, characters.experience, characters.experience)
+        types = (spanner.param_types.INT64, spanner.param_types.INT64, spanner.param_types.INT64, spanner.param_types.STRING, spanner.param_types.INT64, spanner.param_types.INT64, spanner.param_types.INT64)
 
         insert_query = f"INSERT {TABLE} ({','.join(columns)}) VALUES ({','.join([ '@' + c if c not in ('CreatedAt', 'UpdatedAt') else 'PENDING_COMMIT_TIMESTAMP()' for c in columns])})"
         insert_params = {columns[i]: values[i] for i in range(len(values))}
@@ -111,8 +109,7 @@ def create_characters(characters: Character, db: Database = Depends(get_db)) -> 
 
     db.run_in_transaction(create_character_repository)
 
-    resp = CreateCharacterResponse(id=character_id, user_id=characters.user_id, character_id=characters.character_id ,
-                                   name=characters.name, level=characters.level, experience=characters.experience, strength=characters.strength)
+    resp = CreateCharacterResponse(id=character_id, user_id=characters.user_id, character_id=characters.character_id, name=characters.name, level=characters.level, experience=characters.experience, strength=characters.strength)
     return JSONResponse(status_code=201, content=jsonable_encoder(resp))
 
 
