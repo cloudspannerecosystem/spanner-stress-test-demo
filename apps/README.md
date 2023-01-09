@@ -132,7 +132,7 @@ $ cd ./apps
 # enable virtualenv
 $ pipenv shell
 
-$ python -m pytest --no-header -vv -s
+$ pipenv run test
 ========================================== test session starts ===========================================
 collected 19 items                                                                                       
 

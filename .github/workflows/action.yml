@@ -36,25 +36,6 @@ jobs:
       - name: Pull repo
         uses: actions/checkout@v3
 
-      - name: Lint check for terraform files
-        uses: actionshub/terraform-lint@main
-
-      - name: Read terraform version file
-        id: terraform-version
-        uses: juliangruber/read-file-action@v1
-        with:
-          path: .terraform-version
-
-      - name: Install terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: "${{ steps.terraform-version.outputs.content }}"
-
-      - name: Validate terraform files
-        run: |
-          cp .env_sample .env && make terraform.init
-          cd terraform && terraform validate
-
       - name: Read python version file
         id: python-version
         uses: juliangruber/read-file-action@v1
@@ -78,6 +59,25 @@ jobs:
         run: |
           pip install yamllint
           yamllint -d "{extends: relaxed, rules: {line-length: {max: 200}}}" -f standard ./
+
+      - name: Lint check for terraform files
+        uses: actionshub/terraform-lint@main
+
+      - name: Read terraform version file
+        id: terraform-version
+        uses: juliangruber/read-file-action@v1
+        with:
+          path: .terraform-version
+
+      - name: Install terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: "${{ steps.terraform-version.outputs.content }}"
+
+      - name: Validate terraform files
+        run: |
+          cp .env_sample .env && make terraform.init
+          cd terraform && terraform validate
 
       - name: Install dev package in local
         run: cd apps && pipenv install --dev
@@ -105,7 +105,7 @@ jobs:
         run: cd apps && ENV=local SPANNER_EMULATOR_HOST=localhost:9010 GOOGLE_CLOUD_PROJECT=test-local pipenv run ci_test
 
       - name: Submit coverage comments of unit-test
-        id: coverageComment
+        id: coverage_comment
         uses: MishaKav/pytest-coverage-comment@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
