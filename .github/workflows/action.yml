@@ -31,12 +31,6 @@ jobs:
     runs-on: [ubuntu-latest]
     # Steps represent a sequence of tasks that will be executed as part of the job
     timeout-minutes: 30
-    # Add permission to submit comments of test coverage
-    # ref: https://github.com/MishaKav/pytest-coverage-comment/issues/68
-    permissions:
-      pull-requests: write
-      contents: read
-      id-token: write
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Pull repo
