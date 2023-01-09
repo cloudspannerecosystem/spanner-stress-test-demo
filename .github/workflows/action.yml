@@ -108,7 +108,6 @@ jobs:
         id: coverage_comment
         uses: MishaKav/pytest-coverage-comment@main
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           pytest-xml-coverage-path: ./apps/coverage.xml
           junitxml-path: ./apps/pytest.xml
 
