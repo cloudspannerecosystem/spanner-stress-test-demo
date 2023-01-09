@@ -70,7 +70,14 @@ $ locust --headless --timescale --grafana-url=http://localhost:3000 --pghost=loc
 
 ## Environment values
 
-TBD
+|                      |                                                                                                                                    |                                                                                                                          | 
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | 
+| Key name             | Description                                                                                                                        | Example value                                                                                                            | 
+| ENV                  | Env id, but we expected to use "production" when you deploy on Google Cloud.                                                       | production                                                                                                               | 
+| LOG_LEVEL            | Loglevel of app and Locust                                                                                                         | INFO                                                                                                                     |                                                                                                                  | 
+| REDIS_HOST            | Redis FQDN or IP address emulator                                                                                                         | localhost                                                                                                                     |                                                                                                                  | 
+| REDIS_PORT            | Redis port emulator                                                                                                         | 6379                                                                                                                    |                                                                                                                  | 
+| REDIS_CONNECTIONS            | The number of connection to Redis emulator                                                                                                         | 3                                                                                                                     |                                                                                                                  | 
 
 ## Contribution
 

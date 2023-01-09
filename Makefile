@@ -58,6 +58,7 @@ create.emulator.database:
 
 .PHONY: run.spanner-cli
 run.spanner-cli:
+	@docker-compose up -d spanner-cli
 	@docker-compose exec spanner-cli spanner-cli -p $(LOCAL_DEV_CLOUD_PROJECT) -i $(INSTANCE_NAME) -d $(DATABASE_NAME)
 
 .PHONY: run.local-app
@@ -85,6 +86,10 @@ load.local-data:
 .PHONY: create.dbdoc
 create.dbdoc:
 	@cd $(APP_DIR) && tbls doc spanner://$(GOOGLE_CLOUD_PROJECT)/$(INSTANCE_NAME)/$(DATABASE_NAME)
+
+.PHONY: run.workflows
+run.workflows:
+	@act -P ubuntu-latest=lucasalt/act_base:latest
 
 # NOTE: commands for cloud environment followings
 .PHONY: set.cloud.config

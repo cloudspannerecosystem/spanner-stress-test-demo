@@ -20,7 +20,7 @@ from time import time
 from typing import Dict, Tuple
 
 # NOTE: need to import to use plugins vis CLI
-import locust_plugins
+import locust_plugins  # noqa: F401
 from faker import Faker
 from google.cloud.logging.handlers import ContainerEngineHandler
 from pydantic import BaseModel, EmailStr, Field

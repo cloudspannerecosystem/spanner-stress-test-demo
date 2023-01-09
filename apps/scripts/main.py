@@ -53,8 +53,7 @@ def create_masters(args):
     print("==== start to creare opponent masters ===")
     for _ in range(args.line):
         try:
-            fake_opponent_master = OpponentMaster(name=fake.first_kana_name(), kind="fake",
-                                                  strength=randint(1, pow(10, 5)), experience=randint(1, pow(10, 5)))
+            fake_opponent_master = OpponentMaster(name=fake.first_kana_name(), kind="fake", strength=randint(1, pow(10, 5)), experience=randint(1, pow(10, 5)))
             res = requests.post(url=f"{host}/api/{API_VERSION}/opponent_master/", headers=headers, data=fake_opponent_master.json())
             print(res.json())
         except Exception as e:

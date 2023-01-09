@@ -11,5 +11,6 @@ schemas
 Dockerfile
 scripts
 README.md
-locust
-terraform
+.pytest_cache
+tests
+dbdoc

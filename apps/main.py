@@ -21,7 +21,7 @@ from routers.opponent_master import router as opponent_master_router
 from routers.users import router as user_router
 from settings import StandaloneApplication, setup_gunicorn, setup_trace
 
-app = FastAPI()
+app = FastAPI(title="sample game api", description="sample game app for spanner-stress-test-demo", version=1.0)
 # NOTE: API version 1
 prefix_v1 = "/api/v1"
 app.include_router(user_router, prefix=prefix_v1)

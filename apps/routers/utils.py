@@ -12,14 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from datetime import datetime
 from os import environ, getenv
 from time import time_ns
 from typing import Any, Dict, Tuple
 from uuid import uuid4
 
-from google.cloud.spanner import Client, PingingPool, TransactionPingingPool
+from google.cloud.spanner import Client, PingingPool
 from google.cloud.spanner_v1.database import Database
 from passlib.context import CryptContext
 
@@ -27,14 +26,19 @@ context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 num_shards = 100
 
 # NOTE: Spanner Settings
-PROJECT: str = getenv("GOOGLE_CLOUD_PROJECT", "stress-test-demo")
-INSTANCE: str = getenv("INSTANCE_NAME", "local")
+PROJECT: str = getenv("GOOGLE_CLOUD_PROJECT", "test-local")
+INSTANCE: str = getenv("INSTANCE_NAME", "spanner-demo")
 DATABASE: str = getenv("DATABASE_NAME", "sample-game")
 
-client = Client()
+client = Client(project=PROJECT)
 instance = client.instance(INSTANCE)
-pool = PingingPool(size=30, default_timeout=5, ping_interval=300)
+pool = PingingPool(size=100, default_timeout=5, ping_interval=300)
 database = instance.database(DATABASE, pool=pool)
+
+# NOTE: stale read settings
+character_master_delay: int = 3
+opponent_master_delay: int = 3
+battle_history_delay: int = 15
 
 # NOTE: set host path to spanner own emulator in local env
 if getenv("ENV", "local") == "local":
