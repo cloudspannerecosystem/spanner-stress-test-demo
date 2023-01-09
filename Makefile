@@ -87,6 +87,10 @@ load.local-data:
 create.dbdoc:
 	@cd $(APP_DIR) && tbls doc spanner://$(GOOGLE_CLOUD_PROJECT)/$(INSTANCE_NAME)/$(DATABASE_NAME)
 
+.PHONY: run.workflows
+run.workflows:
+	@act -P ubuntu-latest=lucasalt/act_base:latest
+
 # NOTE: commands for cloud environment followings
 .PHONY: set.cloud.config
 set.cloud.config:
@@ -171,7 +175,7 @@ ssh.bastion:
 
 .PHONY: terraform.init
 terraform.init:
-	@cd $(CURRENT_DIR)/terraform && terraform init && terraform validate
+	@cd $(CURRENT_DIR)/terraform && terraform init
 
 .PHONY: terraform.plan
 terraform.plan:

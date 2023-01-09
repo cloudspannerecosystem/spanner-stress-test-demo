@@ -4,13 +4,13 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-locust = "==2.9.0"
-faker = "==13.13.0"
-pydantic = "==1.9.1"
-email-validator = "==1.2.1"
-google-cloud-logging = "==3.1.2"
-redis = "==4.3.4"
-locust-plugins = "==2.6.9"
+locust = "=2.9.0"
+faker = "=13.13.0"
+pydantic = "=1.9.1"
+email-validator = "=1.2.1"
+google-cloud-logging = "=3.1.2"
+redis = "=4.3.4"
+locust-plugins = "=2.6.9"
 
 [dev-packages]
 ipdb = "*"

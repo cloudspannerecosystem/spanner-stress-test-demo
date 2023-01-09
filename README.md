@@ -65,6 +65,7 @@ If you need to develop this repository, you should install followings:
 - [docker-compose](https://docs.docker.jp/compose/install/index.html) (auther version: version 1.24.0)
 - [tbls](https://github.com/k1LoW/tbls) (Optional)
 - [terraform-docs](https://github.com/terraform-docs/terraform-docs) (Optional)
+- [act](https://github.com/nektos/act) (Optional)
 
 ## How to use this demo
 
@@ -151,9 +152,17 @@ $ make delete.cloud.environment
 
 ## Features
 
+### Asis
+
 - Rest API for dummy game
   - opperate Cloud Spanner([database schema](./apps/dbdoc/README.md))
 - API docs of Swagger by FastAPI
+- Distributed Stressor by Locust
+- IaC by terraform and gcloud
+
+### Tobe
+
+- [Auto Scalling for Cloud Spanner](https://cloud.google.com/architecture/autoscaling-cloud-spanner), instead of manual scalling
 
 ## Reference
 
@@ -171,6 +180,8 @@ $ make delete.cloud.environment
 - [OpenTelemetry FastAPI Instrunentation](https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/fastapi/fastapi.html)
 
 ## Contribution
+
+__Note: Understand [how to check your PR](.github/workflows/action.yml) before you send PR__
 
 - [CONTRIBUTING docs](./docs/contributing.md)
 

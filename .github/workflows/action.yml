@@ -36,26 +36,35 @@ jobs:
       - name: Pull repo
         uses: actions/checkout@v3
 
-      - name: Lint check for yaml files
-        run: |
-          apt-get install yamllint -y
-          yamllint -d "{extends: relaxed, rules: {line-length: {max: 200}}}" -f standard ./
-
       - name: Lint check for terraform files
         uses: actionshub/terraform-lint@main
+
+      - name: Read terraform version file
+        id: terraform-version
+        uses: juliangruber/read-file-action@v1
+        with:
+          path: .terraform-version
 
       - name: Install terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.2.9
+          terraform_version: "${{ steps.terraform-version.outputs.content }}"
 
       - name: Validate terraform files
-        run: cp .env_sample .env && make terraform.init
+        run: |
+          cp .env_sample .env && make terraform.init
+          cd terraform && terraform validate
 
-      - name: Install python 3.9.14
+      - name: Read python version file
+        id: python-version
+        uses: juliangruber/read-file-action@v1
+        with:
+          path: .python-version
+
+      - name: Install python
         uses: gabrielfalcao/pyenv-action@v11
         with:
-          default: 3.9.14
+          default: "${{ steps.python-version.outputs.content }}"
           command: |
             pip install -U pip
             pip install pipenv
@@ -64,6 +73,11 @@ jobs:
         run: |
           pip install flake8
           flake8 . --ignore=E501 --extend-exclude=terraform
+
+      - name: Lint check for yaml files
+        run: |
+          pip install yamllint
+          yamllint -d "{extends: relaxed, rules: {line-length: {max: 200}}}" -f standard ./
 
       - name: Install dev package in local
         run: cd apps && pipenv install --dev
@@ -88,21 +102,41 @@ jobs:
           make create.emulator.database
 
       - name: Run unit-test
-        run: cd apps && ENV=local SPANNER_EMULATOR_HOST=localhost:9010 GOOGLE_CLOUD_PROJECT=test-local pipenv run test
+        run: cd apps && ENV=local SPANNER_EMULATOR_HOST=localhost:9010 GOOGLE_CLOUD_PROJECT=test-local pipenv run ci_test
+
+      - name: Submit coverage comments of unit-test
+        id: coverageComment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          pytest-xml-coverage-path: ./apps/coverage.xml
+          junitxml-path: ./apps/pytest.xml
 
       - name: Run app container
         run: |
           docker-compose down
           make run.local-app
 
-      - name: Install library for script of loading master data
-        run: pip install -r apps/scripts/requirements.txt
-
       - name: Run integration-test to load master data
-        run: python ./apps/scripts/main.py -l 10
+        run: |
+          pip install -r apps/scripts/requirements.txt
+          python ./apps/scripts/main.py -l 10
 
       - name: Run integration-test of simple stress test in local
         run: make run.local-locust
+
+      - name: Check the number of running container
+        run: |
+          sleep 10
+          if [ $(docker-compose ps | grep Up | wc -l) -ne 6 ]
+          then
+            echo "Does not running some containers"
+            docker-compose ps
+            exit 1
+          fi
+
+      - name: Output locust logs to check failed-rate
+        run: docker-compose logs --tail=200 locust
 
       - name: Stop containers
         if: always()
