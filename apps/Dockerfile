@@ -22,6 +22,6 @@ FROM python:3.9-slim-buster as runner
 WORKDIR /user/src/app
 COPY ./ /user/src/app
 COPY --from=builder /tmp/requirements.txt /user/src/app/requirements.txt
-RUN apt-get update && apt-get install -y build-essential && pip install --no-cache-dir --upgrade -r /user/src/app/requirements.txt && && adduser --disabled-password --gecos '' app_user && chown -R app_user /user/src/
+RUN apt-get update && apt-get install -y build-essential && pip install --no-cache-dir --upgrade -r /user/src/app/requirements.txt && adduser --disabled-password --gecos '' app_user && chown -R app_user /user/src/
 USER app_user
 ENTRYPOINT python /user/src/app/main.py

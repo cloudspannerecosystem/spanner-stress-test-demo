@@ -104,13 +104,12 @@ jobs:
       - name: Run unit-test
         run: cd apps && ENV=local SPANNER_EMULATOR_HOST=localhost:9010 GOOGLE_CLOUD_PROJECT=test-local pipenv run ci_test
 
-      - name: Submit coverage comments of unit-test
-        id: coverage_comment
-        uses: MishaKav/pytest-coverage-comment@main
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          pytest-xml-coverage-path: ./apps/coverage.xml
-          junitxml-path: ./apps/pytest.xml
+      # - name: Submit coverage comments of unit-test
+      #   id: coverage_comment
+      #   uses: MishaKav/pytest-coverage-comment@main
+      #   with:
+      #     pytest-xml-coverage-path: ./apps/coverage.xml
+      #     junitxml-path: ./apps/pytest.xml
 
       - name: Run app container
         run: |
