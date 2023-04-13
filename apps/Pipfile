@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-fastapi = "~=0.95.0"
+fastapi = "~=0.78.0"
 uvicorn = "~=0.17.6"
 email-validator = "~=1.2.1"
 google-cloud-spanner = "~=3.14.1"
