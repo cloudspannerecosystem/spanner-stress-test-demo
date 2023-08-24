@@ -43,7 +43,7 @@ jobs:
           path: .python-version
 
       - name: Install python
-        uses: gabrielfalcao/pyenv-action@v11
+        uses: gabrielfalcao/pyenv-action@v16
         with:
           default: "${{ steps.python-version.outputs.content }}"
           command: |
