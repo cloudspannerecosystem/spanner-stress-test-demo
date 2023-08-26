@@ -146,3 +146,5 @@ dev-key.json
 # pytest
 pytest.xml
 coverage.xml
+
+terraformer.json

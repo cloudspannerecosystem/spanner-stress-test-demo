@@ -120,7 +120,7 @@ delete.database:
 build.apps:
 	@echo "==== Build app and push image to Google Artifactregistry ===="
 	@yes | gcloud auth configure-docker $(REGION)-docker.pkg.dev
-	@cd $(APP_DIR) && docker build -t $(REPOGITORY)/$(SERVICE_NAME):$(COMMIT_SHA) .
+	@cd $(APP_DIR) && docker build -t $(REPOGITORY)/$(SERVICE_NAME):$(COMMIT_SHA) --no-cache .
 	@docker push $(REPOGITORY)/$(SERVICE_NAME):$(COMMIT_SHA)
 	@yes | docker system prune
 
@@ -184,12 +184,22 @@ terraform.plan:
 .PHONY: terraform.apply
 terraform.apply:
 	@echo "==== Create Infra by terraform ===="
-	@cd $(CURRENT_DIR)/terraform && terraform apply -var 'project_id=$(GOOGLE_CLOUD_PROJECT)' -var 'credential_file_path=$(KEY_PATH)' -var 'access_accounts=$(ACCOUNTS)' -auto-approve --parallelism=3
+	@cd $(CURRENT_DIR)/terraform && terraform apply \
+		-var 'project_id=$(GOOGLE_CLOUD_PROJECT)' \
+		-var 'credential_file_path=$(KEY_PATH)' \
+		-var 'access_accounts=$(ACCOUNTS)' \
+		-var 'region=$(REGION)' \
+		-auto-approve --parallelism=3
 
 .PHONY: terraform.destroy
 terraform.destroy:
 	@echo "==== Delete Infra via terraform ===="
-	@cd $(CURRENT_DIR)/terraform && terraform destroy -var 'project_id=$(GOOGLE_CLOUD_PROJECT)' -var 'credential_file_path=$(KEY_PATH)' -var 'access_accounts=$(ACCOUNTS)' -auto-approve --parallelism=3
+	@cd $(CURRENT_DIR)/terraform && terraform destroy \
+		-var 'project_id=$(GOOGLE_CLOUD_PROJECT)' \
+		-var 'credential_file_path=$(KEY_PATH)' \
+		-var 'access_accounts=$(ACCOUNTS)' \
+		-var 'region=$(REGION)' \
+		-auto-approve --parallelism=3
 
 .PHONY: create.cloud.environment
 create.cloud.environment:
