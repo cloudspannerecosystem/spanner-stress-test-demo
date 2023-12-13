@@ -58,21 +58,21 @@ create.emulator.database:
 
 .PHONY: run.spanner-cli
 run.spanner-cli:
-	@docker-compose up -d spanner-cli
-	@docker-compose exec spanner-cli spanner-cli -p $(LOCAL_DEV_CLOUD_PROJECT) -i $(INSTANCE_NAME) -d $(DATABASE_NAME)
+	@docker compose up -d spanner-cli
+	@docker compose exec spanner-cli spanner-cli -p $(LOCAL_DEV_CLOUD_PROJECT) -i $(INSTANCE_NAME) -d $(DATABASE_NAME)
 
 .PHONY: run.local-app
 run.local-app:
-	@docker-compose up -d spanner
+	@docker compose up -d spanner
 	@sleep 3s
 	@make create.emulator.database
-	@GOOGLE_CLOUD_PROJECT=$(LOCAL_DEV_CLOUD_PROJECT) INSTANCE_NAME=$(INSTANCE_NAME) DATABASE_NAME=$(DATABASE_NAME) docker-compose up -d app
+	@GOOGLE_CLOUD_PROJECT=$(LOCAL_DEV_CLOUD_PROJECT) INSTANCE_NAME=$(INSTANCE_NAME) DATABASE_NAME=$(DATABASE_NAME) docker compose up -d app
 
 .PHONY: run.local-locust
 run.local-locust:
-	@docker-compose up -d redis postgres grafana
+	@docker compose up -d redis postgres grafana
 	@sleep 5s
-	@docker-compose up -d locust
+	@docker compose up -d locust
 
 .PHONY: load.local-data
 load.local-data:
