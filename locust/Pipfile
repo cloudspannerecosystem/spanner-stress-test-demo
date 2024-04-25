@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 locust = "~=2.9.0"
 faker = "~=13.13.0"
-pydantic = "~=1.9.1"
+pydantic = "~=1.10.13"
 email-validator = "~=1.2.1"
 google-cloud-logging = "~=3.1.2"
 redis = "~=4.5.4"
